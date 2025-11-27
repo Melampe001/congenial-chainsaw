@@ -147,7 +147,7 @@ function Copy-ConProgreso {
         Write-Log "El origen '$Origen' no existe. Omitiendo." -Nivel "WARN"
         return @{
             Exito = $false
-            ArchivosCopados = 0
+            ArchivosCopiados = 0
             TamanoCopiado = 0
             Errores = @("Origen no existe")
         }
@@ -160,13 +160,13 @@ function Copy-ConProgreso {
         Write-Log "No hay archivos para copiar en '$Origen'." -Nivel "INFO"
         return @{
             Exito = $true
-            ArchivosCopados = 0
+            ArchivosCopiados = 0
             TamanoCopiado = 0
             Errores = @()
         }
     }
     
-    $ArchivosCopados = 0
+    $ArchivosCopiados = 0
     $TamanoCopiado = 0
     $Errores = @()
     $TotalArchivos = $Archivos.Count
@@ -185,12 +185,12 @@ function Copy-ConProgreso {
                 }
                 
                 Copy-Item -Path $Archivo.FullName -Destination $DestinoArchivo -Force
-                $ArchivosCopados++
+                $ArchivosCopiados++
                 $TamanoCopiado += $Archivo.Length
                 
                 # Mostrar progreso cada 10 archivos
-                if ($ArchivosCopados % 10 -eq 0) {
-                    $Porcentaje = [math]::Round(($ArchivosCopados / $TotalArchivos) * 100, 1)
+                if ($ArchivosCopiados % 10 -eq 0) {
+                    $Porcentaje = [math]::Round(($ArchivosCopiados / $TotalArchivos) * 100, 1)
                     Write-Progress -Activity "Copiando $NombreTarea" -Status "$Porcentaje% completado" -PercentComplete $Porcentaje
                 }
             }
@@ -201,7 +201,7 @@ function Copy-ConProgreso {
         }
         else {
             Write-Log "[SIMULACIÓN] Copiaría: $($Archivo.Name) -> $DestinoArchivo" -Nivel "INFO"
-            $ArchivosCopados++
+            $ArchivosCopiados++
             $TamanoCopiado += $Archivo.Length
         }
     }
@@ -210,7 +210,7 @@ function Copy-ConProgreso {
     
     return @{
         Exito = ($Errores.Count -eq 0)
-        ArchivosCopados = $ArchivosCopados
+        ArchivosCopiados = $ArchivosCopiados
         TamanoCopiado = $TamanoCopiado
         Errores = $Errores
     }
@@ -234,7 +234,7 @@ Ruta de backup: $RutaBackup
 
 RESUMEN DE ARCHIVOS COPIADOS:
 -----------------------------
-Total de archivos: $($Resumen.TotalArchivosCopados)
+Total de archivos: $($Resumen.TotalArchivosCopiados)
 Tamaño total: $(Format-Tamano $Resumen.TamanoTotalCopiado)
 Carpetas procesadas: $($Resumen.CarpetasProcesadas -join ', ')
 
@@ -294,7 +294,7 @@ if (-not $SoloSimular) {
 }
 
 $ResumenTotal = @{
-    TotalArchivosCopados = 0
+    TotalArchivosCopiados = 0
     TamanoTotalCopiado = 0
     TotalErrores = 0
     CarpetasProcesadas = @()
@@ -305,7 +305,7 @@ if (Test-Path $RutaOrigen) {
     Write-Log "---------- Copiando respaldos existentes ----------"
     $DestinoRespaldos = Join-Path $RutaBackupFinal "Respaldos_Organizacion"
     $Resultado = Copy-ConProgreso -Origen $RutaOrigen -Destino $DestinoRespaldos -NombreTarea "Respaldos de Organización"
-    $ResumenTotal.TotalArchivosCopados += $Resultado.ArchivosCopados
+    $ResumenTotal.TotalArchivosCopiados += $Resultado.ArchivosCopiados
     $ResumenTotal.TamanoTotalCopiado += $Resultado.TamanoCopiado
     $ResumenTotal.TotalErrores += $Resultado.Errores.Count
     $ResumenTotal.CarpetasProcesadas += "Respaldos_Organizacion"
@@ -319,7 +319,7 @@ foreach ($NombreCarpeta in $CarpetasUsuarioDefecto.Keys) {
         Write-Log "---------- Procesando: $NombreCarpeta ----------"
         $DestinoUsuario = Join-Path $RutaBackupFinal "Usuario\$NombreCarpeta"
         $Resultado = Copy-ConProgreso -Origen $RutaCarpeta -Destino $DestinoUsuario -NombreTarea $NombreCarpeta
-        $ResumenTotal.TotalArchivosCopados += $Resultado.ArchivosCopados
+        $ResumenTotal.TotalArchivosCopiados += $Resultado.ArchivosCopiados
         $ResumenTotal.TamanoTotalCopiado += $Resultado.TamanoCopiado
         $ResumenTotal.TotalErrores += $Resultado.Errores.Count
         $ResumenTotal.CarpetasProcesadas += $NombreCarpeta
@@ -333,7 +333,7 @@ foreach ($CarpetaAdicional in $IncluirCarpetas) {
         Write-Log "---------- Procesando carpeta adicional: $NombreCarpeta ----------"
         $DestinoAdicional = Join-Path $RutaBackupFinal "Adicional\$NombreCarpeta"
         $Resultado = Copy-ConProgreso -Origen $CarpetaAdicional -Destino $DestinoAdicional -NombreTarea $NombreCarpeta
-        $ResumenTotal.TotalArchivosCopados += $Resultado.ArchivosCopados
+        $ResumenTotal.TotalArchivosCopiados += $Resultado.ArchivosCopiados
         $ResumenTotal.TamanoTotalCopiado += $Resultado.TamanoCopiado
         $ResumenTotal.TotalErrores += $Resultado.Errores.Count
         $ResumenTotal.CarpetasProcesadas += "Adicional_$NombreCarpeta"
@@ -345,7 +345,7 @@ Crear-ArchivoManifiesto -RutaBackup $RutaBackupFinal -Resumen $ResumenTotal
 
 Write-Log "====== RESUMEN DE BACKUP A NUBE ======"
 Write-Log "Carpetas procesadas: $($ResumenTotal.CarpetasProcesadas -join ', ')"
-Write-Log "Total archivos copiados: $($ResumenTotal.TotalArchivosCopados)"
+Write-Log "Total archivos copiados: $($ResumenTotal.TotalArchivosCopiados)"
 Write-Log "Tamaño total copiado: $(Format-Tamano $ResumenTotal.TamanoTotalCopiado)"
 Write-Log "Errores totales: $($ResumenTotal.TotalErrores)"
 Write-Log "Ubicación del backup: $RutaBackupFinal"

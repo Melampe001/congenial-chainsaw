@@ -417,7 +417,7 @@ function Enable-AccesoDispositivo {
         return $true
     }
     catch {
-        Write-Log "Error al habilitar acceso a $Dispositivo : $($_.Exception.Message)" -Nivel "ERROR"
+        Write-Log "Error al habilitar acceso a ${Dispositivo}: $($_.Exception.Message)" -Nivel "ERROR"
         return $false
     }
 }

@@ -220,7 +220,7 @@ $Reporte += Crear-SeccionReporte -Titulo "ORGANIZACIÓN DE ARCHIVOS" -Contenido 
 if ($ResumenBackup) {
     $BackupTexto = @"
 Estado: COMPLETADO
-Archivos copiados: $($ResumenBackup.TotalArchivosCopados)
+Archivos copiados: $($ResumenBackup.TotalArchivosCopiados)
 Tamaño total copiado: $(Format-Tamano $ResumenBackup.TamanoTotalCopiado)
 Errores: $($ResumenBackup.TotalErrores)
 Carpetas procesadas: $($ResumenBackup.CarpetasProcesadas -join ', ')
